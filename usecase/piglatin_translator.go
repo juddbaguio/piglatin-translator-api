@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"log"
 	"piglatin-translator-api/contracts"
 	"piglatin-translator-api/model"
 	"regexp"
@@ -24,9 +25,18 @@ func NewPiglatinUsecase(db contracts.TranslatorDB) *Piglatin {
 	}
 }
 
-func (p *Piglatin) Translate(input string) *string {
-	var translatedSlice []string
+func (p *Piglatin) Translate(input string) (*model.TranslationRequest, error) {
+	existing, err := p.translatorDB.FindOneTranslationRequest(input)
+	if err != nil {
+		log.Println("huh", err.Error())
+		return nil, err
+	}
 
+	if existing != nil {
+		return existing, nil
+	}
+
+	var translatedSlice []string
 	splitInput := cleanSplit(input, `[\.\,\s*]`)
 	for _, word := range splitInput {
 		transformedConsonant := transformBeginningConsonantSound(word)
@@ -45,10 +55,17 @@ func (p *Piglatin) Translate(input string) *string {
 	}
 
 	translated := strings.Join(translatedSlice, "")
-	return &translated
+	if err := p.translatorDB.SaveTranslationRequest(input, translated); err != nil {
+		return nil, err
+	}
+
+	return &model.TranslationRequest{
+		Input:       input,
+		Translation: translated,
+	}, nil
 }
 
-func (p *Piglatin) GetTranslationRequests(page int) ([]model.TranslationRequest, error) {
+func (p *Piglatin) GetTranslationRequests(page int) (*[]model.TranslationRequest, error) {
 	return p.translatorDB.GetTranslationRequests(page)
 }
 

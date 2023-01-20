@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"piglatin-translator-api/mocks"
+	"piglatin-translator-api/model"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -8,8 +10,12 @@ import (
 
 func Test_PiglatinTranslator(t *testing.T) {
 	require := assert.New(t)
+	mockPiglatinRepo := &mocks.PiglatinDB{}
 
-	piglatin := Piglatin{}
+	piglatin := Piglatin{
+		translatorDB: mockPiglatinRepo,
+	}
+
 	testCaseList := []struct {
 		input  string
 		output string
@@ -27,8 +33,16 @@ func Test_PiglatinTranslator(t *testing.T) {
 	}
 
 	for _, testCase := range testCaseList {
-		transformedWord := piglatin.Translate(testCase.input)
+		mockPiglatinRepo.SupplyFindOneTranslationRequest(func(input string) (*model.TranslationRequest, error) {
+			return nil, nil
+		})
+		mockPiglatinRepo.SupplySaveTranslationRequest(func(input, translated string) error {
+			return nil
+		})
+
+		transformedWord, err := piglatin.Translate(testCase.input)
 		require.NotNil(transformedWord)
-		require.Equal(testCase.output, *transformedWord)
+		require.Nil(err)
+		require.Equal(testCase.output, transformedWord.Translation)
 	}
 }

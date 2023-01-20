@@ -1,27 +1,23 @@
 package main
 
 import (
-	"regexp"
+	"log"
+	"piglatin-translator-api/infrastructure/db"
+	"piglatin-translator-api/repo"
+	"piglatin-translator-api/usecase"
 )
 
-// var vowelRe, _ = regexp.Compile(`([aAeEiIoOuU]){1}`)
-var honestRe, _ = regexp.Compile(`[\.\,\s*]`)
-
 func main() {
-	input_word := "we are on a riding,in,tandem"
-
-	var properSplit []string
-	var preWordStr string
-	for _, char := range input_word {
-		if honestRe.MatchString(string(char)) {
-			properSplit = append(properSplit, preWordStr)
-			properSplit = append(properSplit, string(char))
-			preWordStr = ""
-			continue
-		}
-
-		preWordStr += string(char)
+	postgresDB, err := db.SetupDatabase()
+	if err != nil {
+		log.Println(err.Error())
+		return
 	}
+	defer postgresDB.Close()
 
-	properSplit = append(properSplit, preWordStr)
+	piglatinRepo := repo.NewPiglatinRepo(postgresDB)
+	piglatinUC := usecase.NewPiglatinUsecase(piglatinRepo)
+
+	log.Println(piglatinUC.Translate("we are on a riding,in,tandem"))
+	log.Println(piglatinUC.GetTranslationRequests(1))
 }
