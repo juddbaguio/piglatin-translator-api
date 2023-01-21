@@ -8,7 +8,7 @@ import (
 type PiglatinDB struct {
 	saveTranslationRequestFn    func(input string, translated string) error
 	findOneTranslationRequestFn func(input string) (*model.TranslationRequest, error)
-	getTranslationRequestsFn    func(page int) (*[]model.TranslationRequest, error)
+	getTranslationRequestsFn    func(page int) (*model.TranslationRequestsSummary, error)
 }
 
 func (p *PiglatinDB) SaveTranslationRequest(input string, translated string) error {
@@ -26,7 +26,7 @@ func (p *PiglatinDB) FindOneTranslationRequest(input string) (*model.Translation
 	return p.findOneTranslationRequestFn(input)
 }
 
-func (p *PiglatinDB) GetTranslationRequests(page int) (*[]model.TranslationRequest, error) {
+func (p *PiglatinDB) GetTranslationRequests(page int) (*model.TranslationRequestsSummary, error) {
 	if p.getTranslationRequestsFn == nil {
 		return nil, errors.New("no function supplied")
 	}
@@ -42,6 +42,6 @@ func (p *PiglatinDB) SupplyFindOneTranslationRequest(fn func(input string) (*mod
 	p.findOneTranslationRequestFn = fn
 }
 
-func (p *PiglatinDB) SupplyGetTranslationRequests(fn func(page int) (*[]model.TranslationRequest, error)) {
+func (p *PiglatinDB) SupplyGetTranslationRequests(fn func(page int) (*model.TranslationRequestsSummary, error)) {
 	p.getTranslationRequestsFn = fn
 }

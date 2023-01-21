@@ -5,7 +5,8 @@ import (
 
 	_ "embed"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	// _ "github.com/jackc/pgx/v5/stdlib"
+	_ "github.com/lib/pq"
 )
 
 var (
@@ -15,7 +16,7 @@ var (
 
 func SetupDatabase() (*sql.DB, error) {
 	dsn := "postgres://piglatin:piglatin@localhost:5432/piglatin?sslmode=disable"
-	db, err := sql.Open("pgx", dsn)
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, err
 	}
