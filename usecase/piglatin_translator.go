@@ -65,8 +65,13 @@ func (p *Piglatin) Translate(input string) (*model.TranslationRequest, error) {
 	}, nil
 }
 
-func (p *Piglatin) GetTranslationRequests(page int) (*[]model.TranslationRequest, error) {
-	return p.translatorDB.GetTranslationRequests(page)
+func (p *Piglatin) GetTranslationRequests(page int) (*model.TranslationRequestsSummary, error) {
+	translationList, err := p.translatorDB.GetTranslationRequests(page)
+	if err != nil {
+		log.Println(err.Error())
+		return nil, err
+	}
+	return translationList, nil
 }
 
 func transformBeginningVowelSound(word string) *string {
